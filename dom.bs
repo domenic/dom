@@ -2990,6 +2990,19 @@ optional boolean <dfn for="insert"><var>suppressObservers</var></dfn> (default f
 
    <li>
     <p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
+    <var>node</var>, in <a>shadow-including tree order</a>: if <var>inclusiveDescendant</var> is
+    <a>connected</a>, is <a for=Element>custom</a>, and its
+    <a for=Element>custom element registry</a> is non-null, then
+    <a>enqueue a custom element callback reaction</a> with <var>inclusiveDescendant</var>, callback
+    name "<code>connectedCallback</code>", and « ».
+
+    <p class=note>Enqueuing these reactions before running any <a>insertion steps</a> ensures that
+    reactions enqueued by an ancestor's insertion steps do not precede a descendant's connection
+    reaction.
+   </li>
+
+   <li>
+    <p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
     <var>node</var>, in <a>shadow-including tree order</a>:
 
     <ol>
@@ -3009,13 +3022,9 @@ optional boolean <dfn for="insert"><var>suppressObservers</var></dfn> (default f
        <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a>'s
        <a for=CustomElementRegistry>scoped document set</a>.
 
-       <li><p>If <var>inclusiveDescendant</var> is <a for=Element>custom</a>, then
-       <a>enqueue a custom element callback reaction</a> with <var>inclusiveDescendant</var>,
-       callback name "<code>connectedCallback</code>", and « ».
-
        <li>
-        <p>Otherwise, <a lt="try to upgrade an element">try to upgrade</a>
-        <var>inclusiveDescendant</var>.
+        <p>If <var>inclusiveDescendant</var> is not <a for=Element>custom</a>, then
+        <a lt="try to upgrade an element">try to upgrade</a> <var>inclusiveDescendant</var>.
 
         <p class=note>If this successfully upgrades <var>inclusiveDescendant</var>, its
         <code>connectedCallback</code> will be enqueued automatically during the
@@ -3185,6 +3194,12 @@ to do these things asynchronously, however.
 
  <li><p>Run <a>assign slottables for a tree</a> with <var>node</var>'s <a for=tree>root</a>.
 
+ <li><p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
+ <var>node</var>, in <a>shadow-including tree order</a>: if <var>inclusiveDescendant</var> is
+ <a for=Element>custom</a> and <var>newParent</var> is <a>connected</a>, then
+ <a>enqueue a custom element callback reaction</a> with <var>inclusiveDescendant</var>, callback
+ name "<code>connectedMoveCallback</code>", and « ».
+
  <li>
   <p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
   <var>node</var>, in <a>shadow-including tree order</a>:
@@ -3201,10 +3216,6 @@ to do these things asynchronously, however.
     <a for=/>insert</a> and <a for=/>remove</a>, it does not invoke the <a>insertion steps</a>
     or <a>removing steps</a> for <var>inclusiveDescendant</var>.
    </li>
-
-   <li><p>If <var>inclusiveDescendant</var> is <a for=Element>custom</a> and <var>newParent</var> is
-   <a>connected</a>, then <a>enqueue a custom element callback reaction</a> with
-   <var>inclusiveDescendant</var>, callback name "<code>connectedMoveCallback</code>", and « ».
   </ol>
  </li>
 
@@ -3356,30 +3367,23 @@ optional boolean <dfn for=remove><var>suppressObservers</var></dfn> (default fal
    <li><p>Run <a>assign slottables for a tree</a> with <var>node</var>.
   </ol>
 
- <li><p>Run the <a>removing steps</a> with <var>node</var>, true, and <var>parent</var>.
-
  <li><p>Let <var>isParentConnected</var> be <var>parent</var>'s <a>connected</a>.
 
  <li>
-  <p>If <var>node</var> is <a for=Element>custom</a> and <var>isParentConnected</var> is true, then
-  <a>enqueue a custom element callback reaction</a> with <var>node</var>, callback name
-  "<code>disconnectedCallback</code>", and « ».
+  <p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
+  <var>node</var>, in <a>shadow-including tree order</a>: if <var>inclusiveDescendant</var> is
+  <a for=Element>custom</a> and <var>isParentConnected</var> is true, then
+  <a>enqueue a custom element callback reaction</a> with <var>inclusiveDescendant</var>, callback
+  name "<code>disconnectedCallback</code>", and « ».
 
   <p class=note>It is intentional for now that <a for=Element>custom</a> <a for=/>elements</a> do
   not get <var>parent</var> passed. This might change in the future if there is a need.
 
- <li>
-  <p>For each <a>shadow-including descendant</a> <var>descendant</var> of <var>node</var>, in
-  <a>shadow-including tree order</a>:
+ <li><p>Run the <a>removing steps</a> with <var>node</var>, true, and <var>parent</var>.
 
-  <ol>
-   <li><p>Run the <a>removing steps</a> with <var>descendant</var>, false, and <var>parent</var>.
-
-   <li><p>If <var>descendant</var> is <a for=Element>custom</a> and <var>isParentConnected</var>
-   is true, then <a>enqueue a custom element callback reaction</a> with <var>descendant</var>,
-   callback name "<code>disconnectedCallback</code>", and « ».
-  </ol>
- </li>
+ <li><p>For each <a>shadow-including descendant</a> <var>descendant</var> of <var>node</var>, in
+ <a>shadow-including tree order</a>, run the <a>removing steps</a> with <var>descendant</var>, false,
+ and <var>parent</var>.
 
  <li><p><a>Add transient registered observers</a> given <var>node</var> and <var>parent</var>.
 
